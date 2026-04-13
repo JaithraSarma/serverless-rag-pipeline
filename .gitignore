@@ -1,0 +1,23 @@
+# Terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/*.tfstate
+infra/*.tfstate.backup
+infra/tfplan
+infra/terraform.tfvars
+
+# Build artifacts
+build/package/
+build/lambda.zip
+
+# Python cache
+__pycache__/
+*.pyc
+app/src/__pycache__/
+
+# Local environments
+app/.venv/
+.venv/
+
+# Local proof/log artifacts
+proof/
