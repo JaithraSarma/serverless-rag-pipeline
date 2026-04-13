@@ -48,6 +48,20 @@ When a client calls `POST /query` with `{ "question": "..." }`, this is what hap
     - `QueryLatencyMs`
     - `OpenAITokenCount`
 
+## 3A. Companion Files You Should Know
+
+These files make day-2 operations and demos easier:
+
+- `app/events/query_request.json`: Known-good payload for API testing.
+- `app/events/query_request_empty.json`: Negative test payload for 400 handling.
+- `app/sample-runbooks/credential-rotation.md`: Seed runbook content for first retrieval checks.
+- `scripts/package_lambda.ps1`: Builds `build/lambda.zip` locally.
+- `scripts/deploy_infra.ps1`: Applies Terraform quickly.
+- `scripts/smoke_test.ps1`: Sends a test query to the deployed API.
+- `scripts/destroy_infra.ps1`: Destroys the stack to control costs.
+- `docs/operational-checklist.md`: Checklist to avoid missing critical deploy/cleanup steps.
+- `docs/interview-quick-revision.md`: Last-minute summary before interviews.
+
 ## 4. Why Each Technology Was Chosen
 
 ### S3 for runbooks
