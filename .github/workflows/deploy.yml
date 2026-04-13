@@ -1,0 +1,71 @@
+name: Deploy Serverless RAG
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - app/**
+      - infra/**
+      - .github/workflows/deploy.yml
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    env:
+      TF_VAR_aws_region: ${{ secrets.AWS_REGION }}
+      TF_VAR_project_name: ${{ secrets.PROJECT_NAME }}
+      TF_VAR_runbooks_bucket_name: ${{ secrets.RUNBOOKS_BUCKET_NAME }}
+      TF_VAR_openai_api_key_parameter_name: ${{ secrets.OPENAI_API_KEY_PARAMETER_NAME }}
+      TF_VAR_runbook_prefix: ${{ secrets.RUNBOOK_PREFIX }}
+      TF_VAR_chunk_size_tokens: ${{ secrets.CHUNK_SIZE_TOKENS }}
+      TF_VAR_chunk_overlap_tokens: ${{ secrets.CHUNK_OVERLAP_TOKENS }}
+      TF_VAR_metrics_namespace: ${{ secrets.METRICS_NAMESPACE }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build Lambda package
+        run: |
+          rm -rf build/package build/lambda.zip
+          mkdir -p build/package
+          pip install -r app/requirements.txt -t build/package
+          cp app/src/lambda_function.py build/package/
+          cd build/package
+          zip -r ../lambda.zip .
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Terraform Init
+        working-directory: infra
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: infra
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        working-directory: infra
+        run: terraform apply -auto-approve tfplan
