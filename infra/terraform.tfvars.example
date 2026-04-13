@@ -1,0 +1,13 @@
+aws_region                     = "us-east-1"
+project_name                   = "serverless-rag"
+runbooks_bucket_name           = "serverless-rag-your-unique-bucket"
+openai_api_key_parameter_name  = "/serverless-rag/openai-api-key"
+runbook_prefix                 = "runbooks/"
+chunk_size_tokens              = 500
+chunk_overlap_tokens           = 50
+lambda_timeout_seconds         = 30
+lambda_memory_mb               = 1024
+embedding_model                = "text-embedding-3-small"
+chat_model                     = "gpt-3.5-turbo"
+top_k                          = 4
+metrics_namespace              = "ServerlessRag"
