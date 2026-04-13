@@ -31,12 +31,12 @@ s3_client = boto3.client("s3")
 ssm_client = boto3.client("ssm")
 cloudwatch_client = boto3.client("cloudwatch")
 
-_openai_client = None
-_ssm_api_key_cache = None
 _runtime_cache: Dict[str, object] = {
     "manifest_hash": None,
     "index": None,
     "chunks": None,
+    "openai_client": None,
+    "openai_api_key": None,
 }
 
 
@@ -49,17 +49,19 @@ def _build_response(status_code: int, payload: Dict) -> Dict:
 
 
 def _get_openai_client() -> OpenAI:
-    global _openai_client, _ssm_api_key_cache
+    cached_client = _runtime_cache.get("openai_client")
+    if cached_client is not None:
+        return cached_client
 
-    if _openai_client is not None:
-        return _openai_client
-
-    if _ssm_api_key_cache is None:
+    cached_api_key = _runtime_cache.get("openai_api_key")
+    if cached_api_key is None:
         param = ssm_client.get_parameter(Name=OPENAI_API_KEY_SSM_PARAM, WithDecryption=True)
-        _ssm_api_key_cache = param["Parameter"]["Value"]
+        cached_api_key = param["Parameter"]["Value"]
+        _runtime_cache["openai_api_key"] = cached_api_key
 
-    _openai_client = OpenAI(api_key=_ssm_api_key_cache)
-    return _openai_client
+    client = OpenAI(api_key=cached_api_key)
+    _runtime_cache["openai_client"] = client
+    return client
 
 
 def _list_runbook_objects() -> List[Dict]:
@@ -216,7 +218,7 @@ def _ensure_index() -> Tuple[faiss.Index, List[Dict]]:
 def _retrieve(question: str, index: faiss.Index, chunks: List[Dict]) -> List[Dict]:
     query_vec = _embed_texts([question])
 
-    # TODO: If query volume grows, replace FAISS-on-Lambda with a managed vector DB.
+    # TODO(rag-scale): If query volume grows, replace FAISS-on-Lambda with a managed vector DB.  # pylint: disable=fixme
     # Tradeoff: managed stores add operational cost/network hops, but remove reindexing
     # pressure and provide durable, shared indexes across concurrent Lambda instances.
     distances, indices = index.search(query_vec, TOP_K)
@@ -322,12 +324,12 @@ def lambda_handler(event, _context):
         return _build_response(400, {"error": str(exc)})
     except ClientError as exc:
         return _build_response(502, {"error": f"AWS API error: {str(exc)}"})
-    except Exception as exc:
+    except Exception as exc:  # pylint: disable=broad-exception-caught
         return _build_response(500, {"error": f"Unhandled error: {str(exc)}"})
     finally:
         elapsed_ms = (time.perf_counter() - start_time) * 1000
         try:
             _emit_metrics(elapsed_ms, token_count)
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             # Metrics should never block serving a response.
             pass
