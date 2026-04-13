@@ -47,6 +47,17 @@ No LangChain is used for embedding or retrieval logic so the Lambda package rema
 - `build/`: generated artifact location (`lambda.zip`).
 - `proof/`: local test/deploy evidence logs.
 
+## Helper Assets Included
+
+- `app/events/query_request.json`: Valid sample request body for local or live API testing.
+- `app/events/query_request_empty.json`: Invalid request body to validate 400 handling.
+- `app/sample-runbooks/credential-rotation.md`: Starter runbook for first retrieval test.
+- `scripts/package_lambda.ps1`: Local packaging helper to produce `build/lambda.zip`.
+- `scripts/deploy_infra.ps1`: One-command Terraform apply wrapper.
+- `scripts/smoke_test.ps1`: Quick API smoke-test wrapper.
+- `scripts/destroy_infra.ps1`: One-command Terraform destroy wrapper.
+- `docs/operational-checklist.md`: Pre/post-deploy operator checklist.
+
 ## Prerequisites
 
 - AWS account and configured CLI credentials.
