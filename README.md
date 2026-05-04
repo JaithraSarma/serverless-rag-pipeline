@@ -240,6 +240,27 @@ Pipeline behavior:
 2. Run `terraform plan`.
 3. Run `terraform apply` on `main`.
 
+## AWS Native CI/CD (Alternative)
+
+For environments where GitHub Actions is not preferred, this project includes an **AWS Native CI/CD stack** via `infra/cicd.tf`:
+
+- **Source**: AWS CodeCommit
+- **Build & Deploy**: AWS CodeBuild (executes `buildspec.yml`)
+- **Orchestration**: AWS CodePipeline
+
+### How to use AWS Native CI/CD:
+
+1. Deploy the initial stack manually once to provision the pipeline:
+   ```bash
+   cd infra && terraform apply
+   ```
+2. Push your code to the newly created CodeCommit repository:
+   ```bash
+   git remote add aws <codecommit-url>
+   git push aws main
+   ```
+3. The pipeline will automatically trigger, build the Lambda package, and run `terraform apply`.
+
 ## Troubleshooting
 
 ### Terraform apply fails with `iam:CreateRole` AccessDenied

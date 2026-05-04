@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo Installing Terraform...
+      - yum install -y yum-utils
+      - yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+      - yum -y install terraform
+  build:
+    commands:
+      - echo Packaging Lambda function...
+      - mkdir -p build/package
+      - pip install -r app/requirements.txt -t build/package
+      - cp app/src/lambda_function.py build/package/
+      - cd build/package && zip -r ../lambda.zip . && cd ../..
+  post_build:
+    commands:
+      - echo Deploying Infrastructure...
+      - cd infra
+      - terraform init
+      - terraform apply -auto-approve
