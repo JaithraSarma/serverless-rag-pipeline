@@ -216,17 +216,22 @@ Important implementation details:
 - timeout defaults to 30s because query path can include S3 reads + OpenAI calls.
 - memory defaults to 1024 MB because FAISS/index operations benefit from extra CPU allocation tied to memory.
 
-## 11. CI/CD Deep Dive
+### 11. CI/CD Deep Dive
 
-Pipeline responsibilities:
-1. Build Lambda artifact.
-2. Initialize Terraform backend/providers.
-3. Plan infrastructure drift/changes.
-4. Apply on main branch.
+This project supports two mature CI/CD paths to demonstrate architectural flexibility:
+
+#### Path A: GitHub Actions (Multi-Vendor)
+- **Workflow**: `.github/workflows/deploy.yml`
+- **Runner**: `ubuntu-latest`
+- **Strength**: High visibility, tight integration with GitHub, and excellent community support.
+
+#### Path B: AWS Native (Single-Vendor)
+- **Workflow**: AWS CodePipeline + AWS CodeBuild (`buildspec.yml`)
+- **Source**: AWS CodeCommit
+- **Strength**: Security (everything stays inside AWS), centralized IAM management, and private networking capabilities.
 
 How to discuss maturity:
-- this is a practical single-environment pipeline,
-- production systems typically add environment promotion, approvals, policy-as-code, and rollback playbooks.
+- the project provides **deployment-path parity**; whether using GitHub or AWS Native, the build logic (Python packaging) and infrastructure apply (Terraform) remain consistent.
 
 ## 12. Failure Modes and Debugging Playbook
 
