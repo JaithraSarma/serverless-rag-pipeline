@@ -103,8 +103,7 @@ Optional tuning knobs:
 
 ### 3) Build Lambda package
 
-From repository root:
-
+**Option A: Bash (Linux/macOS/Git Bash)**
 ```bash
 rm -rf build/package build/lambda.zip
 mkdir -p build/package
@@ -112,6 +111,14 @@ pip install -r app/requirements.txt -t build/package
 cp app/src/lambda_function.py build/package/
 cd build/package && zip -r ../lambda.zip .
 ```
+
+**Option B: PowerShell (Windows)**
+```powershell
+.\scripts\package_lambda.ps1
+```
+
+> [!NOTE]
+> The PowerShell script automatically handles the creation of the `build/` directory and creates a compatible ZIP archive.
 
 Why this exists: Terraform deploys `build/lambda.zip` directly (`infra/main.tf`), so packaging must happen before `terraform apply`.
 
@@ -172,6 +179,19 @@ Expected validation error if question is missing:
   "error": "Request body must include a non-empty 'question'"
 }
 ```
+
+## Local Verification (No AWS Required)
+
+Before deploying to AWS, you can verify the core RAG logic using a local mock test. This ensures your Python dependencies and FAISS indexing logic are working correctly.
+
+1. Ensure your `.venv` is active and requirements are installed.
+2. Create a test script (or use the one provided in `scripts/` if available) that mocks the S3 and OpenAI calls.
+3. Run the test:
+   ```bash
+   python scripts/test_lambda_local.py
+   ```
+
+A successful test will output a JSON response containing an answer and citations based on your `app/sample-runbooks/`.
 
 ## Security Decisions (Replicators Should Keep)
 

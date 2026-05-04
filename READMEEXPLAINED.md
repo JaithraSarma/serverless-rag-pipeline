@@ -404,6 +404,9 @@ Unit tests for chunking/parsing/retrieval logic, integration tests for Lambda ha
 ### 25. If an interviewer asks your biggest engineering tradeoff, what do you say?
 I optimized for simplicity, learning velocity, and low operational overhead first. That meant accepting FAISS-in-Lambda limitations. I documented the exact migration path to managed vector infrastructure once scale justifies it.
 
+### 26. How did you validate this system during development?
+I implemented a **local verification layer** using Python's `unittest.mock`. This allowed me to simulate S3 object listing, SSM secret retrieval, and OpenAI responses. By running the actual `lambda_function.py` logic against a local mock, I could verify the token-based chunking and FAISS indexing correctness before ever deploying to AWS. This reduced the debug cycle and prevented unnecessary cloud costs.
+
 ## 19. Complete Configuration Matrix (Everything You Can Tune)
 
 Use this section as the single source of truth for all deploy-time settings.
