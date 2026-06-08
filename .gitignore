@@ -21,3 +21,14 @@ app/.venv/
 
 # Local proof/log artifacts
 proof/
+*.env
+.env
+.env.*
+*.pem
+*.key
+*.tfvars
+terraform.exe
+.terraform/
+*.tfstate*
+node_modules/
+venv/
